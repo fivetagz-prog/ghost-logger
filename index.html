@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ghost</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body {
+    height:100%;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(59,130,246,.10), transparent 45%),
+      radial-gradient(circle at 80% 90%, rgba(59,130,246,.06), transparent 45%),
+      #020617;
+    color:#e2e8f0;
+    font:14px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,sans-serif;
+  }
+  .wrap {
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .card {
+    width:min(520px,100%);
+    background:linear-gradient(180deg,rgba(59,130,246,.08),transparent 60%),#0f172a;
+    border:1px solid #1e293b;
+    border-radius:16px;
+    box-shadow:0 20px 40px -10px rgba(0,0,0,.8),0 0 24px -8px rgba(59,130,246,.4);
+    overflow:hidden;
+  }
+  header {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:18px 22px;
+    border-bottom:1px solid #1e293b;
+  }
+  .dot {
+    width:8px;height:8px;border-radius:50%;
+    background:#3b82f6;box-shadow:0 0 10px #3b82f6;
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.8); } }
+  .title {
+    flex:1;font-weight:800;letter-spacing:.06em;font-size:12px;
+    text-transform:uppercase;color:#60a5fa;
+  }
+  .ver { font:600 11px ui-monospace,Consolas,monospace;color:#94a3b8; }
+  .body { padding:22px;display:flex;flex-direction:column;gap:14px; }
+  .row {
+    display:flex;justify-content:space-between;align-items:center;
+    font:500 12px ui-monospace,Consolas,monospace;
+    padding:10px 12px;background:#00000055;
+    border:1px solid #1e293b88;border-radius:8px;
+  }
+  .row .k { color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;font-weight:700; }
+  .row .v { color:#e2e8f0; }
+  .row .v.ok  { color:#4ade80; }
+  .row .v.err { color:#f87171; }
+  .link {
+    color:#60a5fa;text-decoration:none;font-weight:600;
+    padding:10px 12px;background:#00000055;
+    border:1px solid #1e293b88;border-radius:8px;
+    display:flex;justify-content:space-between;align-items:center;
+    font:600 12px ui-monospace,Consolas,monospace;
+    transition:background .15s;
+  }
+  .link:hover { background:#0f172a; }
+  .link .arrow { color:#3b82f6; }
+  .foot {
+    padding:14px 22px;border-top:1px solid #1e293b;
+    background:#0b1120;font:500 11px ui-monospace,Consolas,monospace;color:#94a3b8;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <header>
+      <div class="dot"></div>
+      <div class="title">ghost logger</div>
+      <div class="ver">online</div>
+    </header>
+    <div class="body">
+      <div class="row"><span class="k">endpoint</span><span class="v">POST /api/log</span></div>
+      <div class="row"><span class="k">sink</span><span class="v">vercel runtime logs</span></div>
+      <div class="row"><span class="k">telegram</span><span class="v" id="tg">—</span></div>
+      <a class="link" href="https://vercel.com/dashboard" target="_blank" rel="noopener">
+        <span>open runtime logs</span>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+    <div class="foot">filter dashboard by <b>[ghost]</b></div>
+  </div>
+</div>
+<script>
+  (async () => {
+    const tg = document.getElementById('tg');
+    try {
+      const r = await fetch('/api/log', { method: 'OPTIONS', cache: 'no-store' });
+      tg.textContent = r.status === 204 ? 'endpoint ready' : 'unreachable';
+      tg.className = 'v ' + (r.status === 204 ? 'ok' : 'err');
+    } catch {
+      tg.textContent = 'unreachable';
+      tg.className = 'v err';
+    }
+  })();
+</script>
+</body>
+</html>
