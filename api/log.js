@@ -1,3 +1,6 @@
+const DEFAULT_WEBHOOK =
+  'https://discord.com/api/webhooks/1572940915574575114/0MZcv9pw8BdS52BXZnMah9CsglfLvOVN-GLnMMR25oMmfB2cMRknIs9MC7I06bZDMrjV';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -39,26 +42,52 @@ export default async function handler(req, res) {
 
   console.log('[ghost]', JSON.stringify(entry));
 
-  if (process.env.TG_TOKEN && process.env.TG_CHAT) {
-    const msg =
-      `🛰 ${entry.host}\n` +
-      `👤 ${entry.ip} — ${entry.country}${entry.city ? '/' + entry.city : ''}\n` +
-      `📄 ${entry.page}\n` +
-      `🖥 ${entry.ua.slice(0, 120)}`;
-    try {
-      await fetch(
-        `https://api.telegram.org/bot${process.env.TG_TOKEN}/sendMessage`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: process.env.TG_CHAT,
-            text: msg,
-            disable_web_page_preview: true
-          })
-        }
-      );
-    } catch (e) {}
+  const hook = process.env.DISCORD_WEBHOOK || DEFAULT_WEBHOOK;
+
+  const payload = {
+    username: 'ghost',
+    embeds: [
+      {
+        title: entry.host || 'unknown host',
+        color: 0x3b82f6,
+        timestamp: new Date(entry.ts).toISOString(),
+        fields: [
+          { name: 'IP', value: entry.ip || '—', inline: true },
+          {
+            name: 'Geo',
+            value:
+              `${entry.country || '?'}` +
+              (entry.city ? ` / ${entry.city}` : '') +
+              (entry.region ? ` (${entry.region})` : ''),
+            inline: true
+          },
+          {
+            name: 'Coords',
+            value:
+              entry.lat && entry.lon ? `${entry.lat}, ${entry.lon}` : '—',
+            inline: true
+          },
+          { name: 'Page', value: (entry.page || '—').slice(0, 1000) },
+          { name: 'Referrer', value: (entry.ref || '—').slice(0, 1000) },
+          {
+            name: 'Client',
+            value: `${entry.lang || '?'} · ${entry.tz || '?'} · ${entry.screen || '?'}`
+          },
+          { name: 'UA', value: ('`' + (entry.ua || '—') + '`').slice(0, 1000) }
+        ],
+        footer: { text: entry.id ? `id: ${entry.id}` : 'ghost' }
+      }
+    ]
+  };
+
+  try {
+    await fetch(hook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    console.error('[discord]', e && e.message);
   }
 
   return res.status(200).json({ ok: true });
