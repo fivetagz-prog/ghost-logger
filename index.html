@@ -85,8 +85,8 @@
     </header>
     <div class="body">
       <div class="row"><span class="k">endpoint</span><span class="v">POST /api/log</span></div>
-      <div class="row"><span class="k">sink</span><span class="v">vercel runtime logs</span></div>
-      <div class="row"><span class="k">telegram</span><span class="v" id="tg">—</span></div>
+      <div class="row"><span class="k">sink</span><span class="v">vercel logs + discord</span></div>
+      <div class="row"><span class="k">discord</span><span class="v" id="dc">—</span></div>
       <a class="link" href="https://vercel.com/dashboard" target="_blank" rel="noopener">
         <span>open runtime logs</span>
         <span class="arrow">→</span>
@@ -97,14 +97,14 @@
 </div>
 <script>
   (async () => {
-    const tg = document.getElementById('tg');
+    const dc = document.getElementById('dc');
     try {
       const r = await fetch('/api/log', { method: 'OPTIONS', cache: 'no-store' });
-      tg.textContent = r.status === 204 ? 'endpoint ready' : 'unreachable';
-      tg.className = 'v ' + (r.status === 204 ? 'ok' : 'err');
+      dc.textContent = r.status === 204 ? 'endpoint ready' : 'unreachable';
+      dc.className = 'v ' + (r.status === 204 ? 'ok' : 'err');
     } catch {
-      tg.textContent = 'unreachable';
-      tg.className = 'v err';
+      dc.textContent = 'unreachable';
+      dc.className = 'v err';
     }
   })();
 </script>
